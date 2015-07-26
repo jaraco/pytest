@@ -65,7 +65,9 @@ class DoctestItem(pytest.Item):
             reprlocation = ReprFileLocation(filename, lineno, message)
             checker = doctest.OutputChecker()
             REPORT_UDIFF = doctest.REPORT_UDIFF
-            filelines = py.path.local(filename).readlines(cr=0)
+            with open(filename, encoding='utf-8') as instr:
+                remove_cr = lambda line: line.rstrip('\n')
+                filelines = list(map(remove_cr, instr))
             lines = []
             if lineno is not None:
                 i = max(test.lineno, max(0, lineno - 10)) # XXX?
