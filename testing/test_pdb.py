@@ -230,7 +230,27 @@ class TestPDB:
         child.read()
         self.flush(child)
 
-    def test_pdb_interaction_doctest(self, testdir):
+    def test_pdb_interaction_doctest_passes(self, testdir):
+        p1 = testdir.makepyfile("""
+            import pytest
+            def function_1():
+                '''
+                >>> i = 0
+                >>> i
+                0
+                '''
+
+            def test_function_1():
+                assert function_1() == '42'
+        """)
+        child = testdir.spawn_pytest("--doctest-modules --pdb %s" % p1)
+        child.expect("(Pdb)")
+        child.sendeof()
+        rest = child.read().decode("utf8")
+        assert "1 failed" in rest
+        self.flush(child)
+
+    def test_pdb_interaction_doctest_fails(self, testdir):
         p1 = testdir.makepyfile("""
             import pytest
             def function_1():
